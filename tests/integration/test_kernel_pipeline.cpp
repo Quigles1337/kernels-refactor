@@ -189,8 +189,8 @@ static void test_spectral_bridge() {
     double a = 1.0 / std::sqrt(1.0 + r_test * r_test);
     double b = r_test * a;
     ks_in.alpha = Cx{a, 0.0};
-    static const Cx CANONICAL_BETA_PHASE{-KS_ETA,
-                                         KS_ETA}; // e^{i3\u03c0/4}/\u221a2
+    static const Cx CANONICAL_BETA_PHASE{-ETA,
+                                         ETA}; // e^{i3\u03c0/4}/\u221a2
     ks_in.beta = CANONICAL_BETA_PHASE * (b / std::abs(CANONICAL_BETA_PHASE));
 
     auto ch = SpectralBridge::to_channel(ks_in);

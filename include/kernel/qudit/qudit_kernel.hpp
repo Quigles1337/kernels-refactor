@@ -350,6 +350,9 @@ public:
 
   const std::vector<MemoryBank> &banks() const { return banks_; }
   int dimension() const { return d_; }
+  uint64_t total_writes() const { return total_writes_; }
+  uint64_t total_reads() const { return total_reads_; }
+  uint32_t rotation_count() const { return rotation_count_; }
 
   bool validate_coherence() const {
     constexpr double MAX_COEFF_NORM = 100.0;
@@ -545,6 +548,7 @@ public:
               << "  (must be 1.0)\n";
   }
 
+  uint64_t current_tick() const { return tick_; }
   QuditMemory &memory() { return *memory_; }
   const QuditMemory &memory() const { return *memory_; }
   std::vector<QuditProcess> &processes() { return processes_; }

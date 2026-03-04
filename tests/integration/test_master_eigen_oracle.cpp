@@ -566,7 +566,7 @@ static void test_mechanism_isolation() {
   static constexpr double ABL_THETA = PI / 3.0;
   const uint64_t ns[] = {256, 1024, 4096, 16384};
 
-  using Cx = kernel::oracle::Cx;
+  using Cx = kernel::Cx;
   const Cx target_ph{std::cos(ABL_THETA), std::sin(ABL_THETA)};
 
   std::cout << "\n  (baseline normal oracle p_success = 1.00 for all N — "

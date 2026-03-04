@@ -57,7 +57,7 @@ using kernel::quantum::PRECESSION_DELTA_PHASE;
 using kernel::quantum::PalindromePrecession;
 
 using namespace kernel;
-using Cx = std::complex<double>;
+
 
 // RNG seed base (all seeds are derived from this for reproducibility).
 static constexpr uint64_t FS_BASE_SEED = 0xDEADBEEF42ULL;

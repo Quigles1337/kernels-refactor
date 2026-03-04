@@ -318,7 +318,7 @@ struct BftEnvironment {
       EthValidatorInfo info = sync_hook->fetch_validator_info(node.id);
       if (!info.is_active) {
         node.inject_amplitude_corruption(0.0);
-      } else if (info.coherence_weight < 1.0 - KS_COHERENCE_TOL) {
+      } else if (info.coherence_weight < 1.0 - COHERENCE_TOL) {
         node.state.beta *= info.coherence_weight;
         node.state.normalize();
       }
@@ -671,7 +671,7 @@ static void test_oscillating_faults() {
 
   for (int cycle = 0; cycle < CYCLES; ++cycle) {
     // Fault phase: inject phase fault into node 0 for 2 rounds.
-    env.inject_phase_faults(0, 1, OHM_PI / 4.0);
+    env.inject_phase_faults(0, 1, PI / 4.0);
     for (int r = 0; r < 2; ++r)
       if (env.run_round())
         ++committed_total;
@@ -722,7 +722,7 @@ static void test_correlated_faults() {
 
   // Correlated burst: crash 4 nodes + phase-fault 2 more simultaneously.
   env.crash_nodes(0, 4);
-  env.inject_phase_faults(4, 2, OHM_PI / 3.0);
+  env.inject_phase_faults(4, 2, PI / 3.0);
 
   double coh_post_burst = env.mean_coherence();
   int committed_during_burst = 0;
@@ -786,7 +786,7 @@ static void test_mixed_failure_modes() {
 
   // Inject all fault types simultaneously.
   env.crash_nodes(0, 2);                       // nodes 0–1
-  env.inject_phase_faults(2, 2, OHM_PI / 5.0); // nodes 2–3
+  env.inject_phase_faults(2, 2, PI / 5.0); // nodes 2–3
   env.delay_nodes(4, 2, 6);                    // nodes 4–5
   env.inject_amplitude_corruption(6, 2, 1.6);  // nodes 6–7
   // nodes 8–18 remain honest

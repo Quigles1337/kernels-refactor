@@ -66,7 +66,7 @@ static constexpr double LOOSE_TOL = 1e-6;
 
 // Wrap angle to (−π, π]
 static double wrap(double a) {
-  return a - 2.0 * OHM_PI * std::floor((a + OHM_PI) / (2.0 * OHM_PI));
+  return a - 2.0 * PI * std::floor((a + PI) / (2.0 * PI));
 }
 
 // Build N phases uniformly spaced over [−spread, +spread] around centre.
@@ -88,7 +88,7 @@ void test_source_exists() {
 
   // N nodes spread over ±π/2 rad around 0 — high frustration
   const int N = 16;
-  auto ph_spread = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph_spread = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat_spread(N, 0.3, ph_spread);
   double E_spread = bat_spread.frustration();
   test_assert(E_spread > 0.1,
@@ -102,7 +102,7 @@ void test_source_exists() {
               "uniform phases: frustration E = 0 (no source — dead battery)");
 
   // Frustration scales with spread: wider spread → more source energy
-  auto ph_narrow = uniform_phases(N, 0.0, OHM_PI / 8.0);
+  auto ph_narrow = uniform_phases(N, 0.0, PI / 8.0);
   PhaseBattery bat_narrow(N, 0.3, ph_narrow);
   test_assert(bat_spread.frustration() > bat_narrow.frustration(),
               "wider spread → more frustration (stronger source)");
@@ -120,7 +120,7 @@ void test_sink_is_conserved() {
   const int STEPS = 50;
 
   // Symmetric spread: mean phase should be 0 throughout
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat(N, 0.3, ph);
   double psi_bar_init = bat.mean_phase();
 
@@ -136,7 +136,7 @@ void test_sink_is_conserved() {
               "(sink address conserved)");
 
   // Offset mean: ψ̄ should stay near π/4
-  auto ph2 = uniform_phases(N, OHM_PI / 4.0, OHM_PI / 3.0);
+  auto ph2 = uniform_phases(N, PI / 4.0, PI / 3.0);
   PhaseBattery bat2(N, 0.4, ph2);
   double psi2_init = bat2.mean_phase();
   for (int i = 0; i < STEPS; ++i)
@@ -147,7 +147,7 @@ void test_sink_is_conserved() {
       "offset mean phase stays near \u03c0/4 under EMA (sink invariant)");
 
   // Frustration must decrease (source gives to sink)
-  auto ph3 = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph3 = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat3(N, 0.3, ph3);
   double E_init = bat3.frustration();
   for (int i = 0; i < STEPS; ++i)
@@ -166,7 +166,7 @@ void test_medium_controls() {
 
   const int N = 16;
   const int STEPS = 20;
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph = uniform_phases(N, 0.0, PI / 2.0);
 
   // g = 0 (open circuit): no energy transfers
   PhaseBattery bat0(N, 0.0, ph);
@@ -223,7 +223,7 @@ void test_three_essentials() {
   const int STEPS = 30;
 
   // ── Missing SOURCE (all phases equal → frustration = 0) ──
-  std::vector<double> ph_flat(N, OHM_PI / 6.0);
+  std::vector<double> ph_flat(N, PI / 6.0);
   PhaseBattery bat_nosrc(N, 0.3, ph_flat);
   double R_nosrc_init = bat_nosrc.circular_r();
   for (int i = 0; i < STEPS; ++i)
@@ -235,7 +235,7 @@ void test_three_essentials() {
               "no source: frustration stays at 0 — no energy to release");
 
   // ── Missing MEDIUM (g=0 → open circuit) ──
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat_nomed(N, 0.0, ph);
   double R_nomed_init = bat_nomed.circular_r();
   for (int i = 0; i < STEPS; ++i)
@@ -279,7 +279,7 @@ void test_coherence_monotone() {
   const int STEPS = 60;
 
   // Uniformly spaced phases (worst case: fully spread)
-  auto ph = uniform_phases(N, 0.0, OHM_PI);
+  auto ph = uniform_phases(N, 0.0, PI);
   PhaseBattery bat(N, 0.3, ph);
   double prev_R = bat.circular_r();
   bool monotone = true;
@@ -299,7 +299,7 @@ void test_coherence_monotone() {
                         "(dissipative sink absorbs all released frustration)");
 
   // Also verify final R is significantly larger than initial R
-  auto ph2 = uniform_phases(N, 0.0, OHM_PI);
+  auto ph2 = uniform_phases(N, 0.0, PI);
   PhaseBattery bat2(N, 0.3, ph2);
   double R_start = bat2.circular_r();
   for (int i = 0; i < STEPS; ++i)
@@ -309,7 +309,7 @@ void test_coherence_monotone() {
               "coherence");
 
   // g = 1 (ideal): single step brings all phases to the mean → R → 1
-  auto ph3 = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph3 = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat3(N, 1.0, ph3);
   bat3.step();
   test_assert(bat3.circular_r() > 1.0 - LOOSE_TOL,
@@ -327,7 +327,7 @@ void test_g_eff_rate() {
   const int N = 20;
   const int MAX_STEPS = 500;
   const double TARGET_R = 0.95;
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph = uniform_phases(N, 0.0, PI / 2.0);
 
   auto steps_to_target = [&](double g) -> int {
     PhaseBattery bat(N, g, ph);
@@ -411,7 +411,7 @@ void test_feedback_loop_stability() {
               "near-perfect coherence: converges to R = 1 under feedback");
 
   // ── Feedback converges at least as fast as the standard step ──
-  auto ph_test = uniform_phases(N, 0.0, OHM_PI / 3.0);
+  auto ph_test = uniform_phases(N, 0.0, PI / 3.0);
   PhaseBattery bat_std(N, 0.3, ph_test);
   PhaseBattery bat_fb(N, 0.3, ph_test);
   for (int i = 0; i < 20; ++i) {
@@ -458,7 +458,7 @@ void test_interaction_energy_scaling() {
               "at R = 1: E_interact = N\u00b7g (maximum focal energy)");
 
   // Simulated convergence: interaction energy rises as phases align
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat(N, g, ph);
   double E_sim_prev = interaction_energy(bat.circular_r(), N, g);
   bool sim_monotone = true;
@@ -494,7 +494,7 @@ void test_silver_balance_symmetry() {
   const double ALPHA = 0.5;
 
   // Build mirror-symmetric phases: ψ_j = −ψ_{N−1−j}, centred on 0
-  auto ph_sym = uniform_phases(N, 0.0, OHM_PI / 4.0);
+  auto ph_sym = uniform_phases(N, 0.0, PI / 4.0);
   bool init_sym = true;
   for (int j = 0; j < (N + 1) / 2; ++j)
     if (std::abs(ph_sym[j] + ph_sym[N - 1 - j]) > TOL)
@@ -518,7 +518,7 @@ void test_silver_balance_symmetry() {
 
   // metallic_oscillating_phases: output spread \u2264 input spread (lensing
   // focuses phases toward the alignment angle)
-  auto ph_spread = uniform_phases(N, 0.0, OHM_PI / 3.0);
+  auto ph_spread = uniform_phases(N, 0.0, PI / 3.0);
   auto ph_out = metallic_oscillating_phases(ph_spread, 0.0, 1.0);
   double ss_in = 0.0, ss_out = 0.0;
   for (double p : ph_spread)
@@ -533,7 +533,7 @@ void test_silver_balance_symmetry() {
   // verifying focal coherence reaches near-unity
   std::cout << "    Multi-phase simulation (metallic projection + feedback "
                "\u03b1=0.5, 10 iter):\n";
-  auto ph_multi = uniform_phases(N, 0.0, OHM_PI / 2.0);
+  auto ph_multi = uniform_phases(N, 0.0, PI / 2.0);
   PhaseBattery bat_multi(N, 0.3, ph_multi);
   for (int iter = 0; iter < 10; ++iter) {
     bat_multi.phases = metallic_oscillating_phases(
@@ -560,7 +560,7 @@ void test_adaptive_alpha_stable() {
 
   const int N = 20;
   const int STEPS = 30;
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 4.0); // moderate spread → R ≈ 0.9
+  auto ph = uniform_phases(N, 0.0, PI / 4.0); // moderate spread → R ≈ 0.9
 
   PhaseBattery bat(N, 0.3, ph);
   bat.set_alpha_sensitivity(0.2, 0.2);
@@ -609,7 +609,7 @@ void test_adaptive_alpha_high_frustration() {
 
   const int N = 20;
   const int STEPS = 60;
-  auto ph = uniform_phases(N, 0.0, OHM_PI * 0.9); // near-full spread → R ≈ 0.1
+  auto ph = uniform_phases(N, 0.0, PI * 0.9); // near-full spread → R ≈ 0.1
 
   // Compare: fixed α = 0.5 vs adaptive α with c1 = 0.3
   PhaseBattery bat_fixed(N, 0.3, ph);
@@ -648,7 +648,7 @@ void test_adaptive_alpha_near_critical() {
 
   const int N = 20;
   const int STEPS = 20;
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 3.0);
+  auto ph = uniform_phases(N, 0.0, PI / 3.0);
 
   // g = 0.9 — near-critical but stable (|1−g| = 0.1 < 1)
   PhaseBattery bat(N, 0.9, ph);
@@ -691,7 +691,7 @@ void test_debug_csv_output() {
 
   const int N = 10;
   const int STEPS = 5;
-  auto ph = uniform_phases(N, 0.0, OHM_PI / 4.0);
+  auto ph = uniform_phases(N, 0.0, PI / 4.0);
 
   PhaseBattery bat(N, 0.3, ph);
   bat.enable_debug(true);

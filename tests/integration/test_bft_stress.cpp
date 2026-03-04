@@ -301,7 +301,7 @@ struct BftEnvironment {
       EthValidatorInfo info = sync_hook->fetch_validator_info(node.id);
       if (!info.is_active) {
         node.inject_amplitude_corruption(0.0); // Fully decohere inactive node.
-      } else if (info.coherence_weight < 1.0 - KS_COHERENCE_TOL) {
+      } else if (info.coherence_weight < 1.0 - COHERENCE_TOL) {
         // Scale beta magnitude by coherence_weight to represent partial stake.
         node.state.beta *= info.coherence_weight;
         node.state.normalize();
@@ -471,7 +471,7 @@ static void test_phase_faults() {
               "mean coherence > 0.99 before fault injection");
 
   // Inject phase fault into node 0 only.
-  env.inject_phase_faults(0, 1, OHM_PI / 3.0);
+  env.inject_phase_faults(0, 1, PI / 3.0);
   bool node0_drifted = env.nodes[0].state.has_drift();
   test_assert(node0_drifted, "phase fault detected: node 0 has_drift() = true");
   test_assert(!env.nodes[0].state.all_invariants(),
@@ -654,7 +654,7 @@ static void test_finality_preservation() {
 
   // Now inject faults (crash 2, phase-fault 1) and run more rounds.
   env.crash_nodes(0, 2);
-  env.inject_phase_faults(2, 1, OHM_PI / 2.0);
+  env.inject_phase_faults(2, 1, PI / 2.0);
   env.nodes[2].try_recover(); // repair immediately
 
   int post_fault_committed = 0;
@@ -687,7 +687,7 @@ static void test_recovery_rate() {
     env.run_round();
 
   // Inject phase fault into every node.
-  env.inject_phase_faults(0, N, OHM_PI / 4.0);
+  env.inject_phase_faults(0, N, PI / 4.0);
   double coh_post_fault = env.mean_coherence();
 
   // Run recovery rounds: each tick calls auto_renormalize if needed, and
@@ -743,7 +743,7 @@ static void test_liveness_and_safety() {
   // Phase 2: crash 2, delay 2, phase-fault 1 simultaneously.
   env.crash_nodes(0, 2);
   env.delay_nodes(2, 2, 8);
-  env.inject_phase_faults(4, 1, OHM_PI / 6.0);
+  env.inject_phase_faults(4, 1, PI / 6.0);
   env.nodes[4].try_recover();
 
   int faulted_committed = 0;

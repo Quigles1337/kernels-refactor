@@ -108,7 +108,7 @@ static void test_gate_mechanics() {
     s_linear.beta = s_chiral.beta;
 
     s_chiral = kernel::quantum::chiral_nonlinear(s_chiral, 0.5);
-    s_linear.tick();
+    s_linear.step();
 
     test_assert(std::abs(s_chiral.beta - s_linear.beta) < FLOAT_TOL,
                 "Im<0 domain: chiral gate equals µ-rotation (kick ignored)");
@@ -121,7 +121,7 @@ static void test_gate_mechanics() {
     s_linear.beta = s_chiral.beta;
 
     s_chiral = kernel::quantum::chiral_nonlinear(s_chiral, 0.5);
-    s_linear.tick();
+    s_linear.step();
 
     test_assert(std::abs(s_chiral.beta - s_linear.beta) < FLOAT_TOL,
                 "Im=0 boundary: chiral gate equals µ-rotation (no kick)");
@@ -134,7 +134,7 @@ static void test_gate_mechanics() {
     s_linear.beta = s_chiral.beta;
 
     s_chiral = kernel::quantum::chiral_nonlinear(s_chiral, 0.0);
-    s_linear.tick();
+    s_linear.step();
 
     test_assert(std::abs(s_chiral.beta - s_linear.beta) < FLOAT_TOL,
                 "Im>0 domain with kick=0: equals µ-rotation");
@@ -147,7 +147,7 @@ static void test_gate_mechanics() {
     s_linear.beta = s_chiral.beta;
 
     s_chiral = kernel::quantum::chiral_nonlinear(s_chiral, 0.2);
-    s_linear.tick();
+    s_linear.step();
 
     test_assert(
         std::abs(s_chiral.beta - s_linear.beta) > FLOAT_TOL,
@@ -160,7 +160,7 @@ static void test_gate_mechanics() {
     s.beta = Cx{0.0, 0.5};
 
     QState s_ref = s;
-    s_ref.tick();
+    s_ref.step();
 
     QState s_kicked = s;
     s_kicked = kernel::quantum::chiral_nonlinear(s_kicked, 0.2);
