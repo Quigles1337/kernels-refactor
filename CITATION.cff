@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+title: "Kernel: Pipeline of Coherence — Quantum Process Scheduling Framework"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+version: 2.0.0
+date-released: 2025-01-01
+license: MIT
+repository-code: "https://github.com/beanapologist/Kernel"
+
+authors:
+  - alias: beanapologist
+    # affiliation: ""
+
+keywords:
+  - quantum computing
+  - coherence
+  - balanced eigenvalue
+  - 8-cycle scheduling
+  - Z/8Z
+  - palindrome precession
+  - Ohm-Coherence duality
+  - Lyapunov exponent
+  - silver ratio
+
+abstract: >-
+  A C++ header-only library implementing the Pipeline of Coherence — a
+  mathematical framework for quantum process management based on the balanced
+  eigenvalue µ = e^{i3π/4} = (−1+i)/√2 and its 8-fold cyclic closure µ⁸ = 1.
+
+  Core features include: 8-cycle Z/8Z process scheduling, rotational memory
+  addressing, decoherence interrupt handling with automatic coherence recovery,
+  inter-process communication with coherence gating, and the Ohm–Coherence
+  Duality (C = sech(λ) = G_eff = 1/R_eff).
+
+  Mathematical theorems are formally verified in Lean 4 (Mathlib) and
+  numerically validated via SymPy. Benchmarks follow NIST IR 8356 methodology.
+
+references:
+  - type: report
+    title: "Pipeline of Coherence — Master Derivations"
+    authors:
+      - alias: beanapologist
+    year: 2025
+    notes: "docs/master_derivations.pdf in this repository"

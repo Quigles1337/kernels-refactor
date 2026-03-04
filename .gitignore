@@ -1,0 +1,84 @@
+# ─── Compiled binaries ────────────────────────────────────────────────────────
+# NEVER commit compiled executables.  The build system regenerates these.
+*.o
+*.a
+*.so
+*.dylib
+*.out
+*.exe
+
+# ─── Build directories ───────────────────────────────────────────────────────
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+_CPack_Packages/
+
+# ─── CodeQL ──────────────────────────────────────────────────────────────────
+_codeql_build_dir/
+_codeql_detected_source_root
+
+# ─── Code coverage ──────────────────────────────────────────────────────────
+*.gcda
+*.gcno
+coverage.info
+coverage/
+
+# ─── Debug symbols ──────────────────────────────────────────────────────────
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# ─── Editor / OS ─────────────────────────────────────────────────────────────
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+
+# ─── Lean 4 / Lake build artifacts ──────────────────────────────────────────
+formal/lean/.lake/
+formal/lean/build/
+formal/lean/lake-manifest.json
+# Legacy path (pre-restructure)
+formal-lean/.lake/
+formal-lean/build/
+formal-lean/lake-manifest.json
+
+# ─── Python cache ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# ─── LaTeX build artifacts ───────────────────────────────────────────────────
+docs/*.aux
+docs/*.log
+docs/*.toc
+docs/*.out
+# docs/*.pdf — compiled PDF IS committed for reproducibility
+
+# ─── Benchmark outputs (regenerable) ────────────────────────────────────────
+scaling_extended.csv
+random_init.csv
+random_oracle.csv
+adversarial.csv
+multi_seed_ci.csv
+norm_inspection.csv
+oracle_blindness.csv
+loglog_plot.csv
+noise_transition_fine.csv
+noise_heatmap.csv
+
+# ─── Generated plots (regenerate via python scripts) ─────────────────────────
+loglog_coh_vs_n.png
+speedup_vs_n.png
+adversarial.png
+multi_seed_ci.png
+norm_inspection.png
+fine_eps_transition.png
+
+# ─── Experiment outputs (regenerable) ────────────────────────────────────────
+experiments/passive_ghz_demo/demo_output/*.npz

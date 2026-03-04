@@ -1,0 +1,72 @@
+name: C++ CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            cc: gcc-12
+            cxx: g++-12
+          - compiler: clang
+            cc: clang-15
+            cxx: clang++-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.cc }} ${{ matrix.cxx }}
+
+      - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No duplicate constants
+        run: |
+          count=$(grep -rn 'constexpr.*double.*ETA' include/ | wc -l)
+          if [ "$count" -gt 1 ]; then
+            echo "ERROR: ETA defined more than once in include/"
+            grep -rn 'constexpr.*double.*ETA' include/
+            exit 1
+          fi
+
+      - name: No committed binaries
+        run: |
+          if git ls-files --error-unmatch '*.exe' '*.o' '*.so' '*.dylib' 2>/dev/null; then
+            echo "ERROR: Binary files tracked by git"
+            exit 1
+          fi
+
+      - name: All headers have pragma once
+        run: |
+          for f in $(find include -name '*.hpp'); do
+            if ! grep -q '#pragma once' "$f"; then
+              echo "ERROR: $f missing #pragma once"
+              exit 1
+            fi
+          done
