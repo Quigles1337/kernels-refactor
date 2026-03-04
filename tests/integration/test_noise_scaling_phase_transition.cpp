@@ -121,14 +121,12 @@ static double pt_linreg_slope(const std::vector<double> &xs,
 
 // ── NullSliceBridge (8-cycle, µ = e^{i3π/4}) ──────────────────────────────
 
-static const Cx PT_MU{-ETA, ETA};
-
 static std::array<Cx, 8> pt_build_bridge() {
   std::array<Cx, 8> bridge;
   Cx power{1.0, 0.0};
   for (int k = 0; k < 8; ++k) {
     bridge[k] = power;
-    power *= PT_MU;
+    power *= MU;
   }
   return bridge;
 }

@@ -105,6 +105,18 @@ int main() {
   check(classify_decoherence(1.50) == DecoherenceLevel::CRITICAL,
         "r=1.50 -> decoherence CRITICAL");
 
+  // QState convenience methods (FIX 1)
+  check(std::abs(psi.c_l1() - 1.0) < 1e-14,
+        "canonical QState C_l1 = 1 (Theorem 9)");
+  check(std::abs(psi.palindrome()) < 1e-14,
+        "canonical QState palindrome residual = 0");
+  check(psi.balanced(),
+        "canonical QState is balanced");
+  QState psi2;
+  psi2.step();
+  check(std::abs(psi2.radius() - 1.0) < 1e-14,
+        "step() preserves r = 1");
+
   std::cout << "\n=== Palindrome Constants ===\n";
   check(SUPER_PERIOD == 109739368ULL,
         "super period = 8 * 13717421 = 109739368");

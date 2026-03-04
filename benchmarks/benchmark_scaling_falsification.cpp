@@ -56,19 +56,14 @@ using kernel::quantum::PALINDROME_DENOM_FACTOR;
 using kernel::quantum::PRECESSION_DELTA_PHASE;
 using kernel::quantum::PalindromePrecession;
 
+using namespace kernel;
 using Cx = std::complex<double>;
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-static constexpr double FS_PI = 3.14159265358979323846;
-static constexpr double FS_TWO_PI = 2.0 * FS_PI;
-static constexpr double FS_ETA = 0.70710678118654752440; // 1/√2
 
 // RNG seed base (all seeds are derived from this for reproducibility).
 static constexpr uint64_t FS_BASE_SEED = 0xDEADBEEF42ULL;
 
 // ── NullSliceBridge (8-channel µ-phasor partition of [0, 2π)) ─────────────────
 struct FSBridge {
-  static const Cx MU; // µ = e^{i3π/4}
   static std::array<Cx, 8> build() {
     std::array<Cx, 8> b;
     Cx p{1.0, 0.0};
@@ -79,7 +74,6 @@ struct FSBridge {
     return b;
   }
 };
-const Cx FSBridge::MU{-FS_ETA, FS_ETA};
 
 // ── Statistics helpers ────────────────────────────────────────────────────────
 static constexpr double LINREG_TOL = 1e-12;
@@ -162,7 +156,7 @@ static uint64_t coherent_search(uint64_t n, uint64_t t_idx,
                                 double init_phase = 0.0) {
   const double sqrt_n = std::sqrt(static_cast<double>(n));
   const double theta_t =
-      FS_TWO_PI * static_cast<double>(t_idx) / static_cast<double>(n);
+      TWO_PI * static_cast<double>(t_idx) / static_cast<double>(n);
   const Cx tgt{std::cos(theta_t), std::sin(theta_t)};
 
   const uint64_t scale =
@@ -309,7 +303,7 @@ static void test_randomised_initial_phase() {
     for (int s = 0; s < SEEDS; ++s) {
       std::mt19937_64 rng(FS_BASE_SEED + static_cast<uint64_t>(s) * 997ULL +
                           static_cast<uint64_t>(k) * 13ULL);
-      std::uniform_real_distribution<double> phase_dist(0.0, FS_TWO_PI);
+      std::uniform_real_distribution<double> phase_dist(0.0, TWO_PI);
       std::uniform_int_distribution<uint64_t> idx_dist(0, n - 1);
 
       for (int tr = 0; tr < TRIALS; ++tr) {

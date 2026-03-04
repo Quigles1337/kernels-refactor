@@ -83,10 +83,28 @@ struct QState {
     return (a > 1e-15) ? std::abs(beta) / a : 0.0;
   }
 
+  /// Theorem 9: ℓ₁-coherence C_ℓ₁ = 2|α||β|.
+  /// At balance (|α| = |β| = 1/√2): C_ℓ₁ = 1.
+  double c_l1() const { return 2.0 * std::abs(alpha) * std::abs(beta); }
+
+  /// Theorem 12: palindrome residual R(r) on current state.
+  /// R = 0 iff r = 1 (balanced).
+  double palindrome() const {
+    double r = radius();
+    return (1.0 / DELTA_S) * (r - 1.0 / r);
+  }
+
+  /// Apply µ rotation: β ← µ·β (one step of the 8-cycle).
+  /// Alias for the rotation part of tick() — some call sites use step() naming.
+  void step() { beta *= MU; }
+
+  /// Theorem 9: balanced ↔ |α| = |β| = 1/√2 ↔ C_ℓ₁ = 1.
+  bool balanced() const { return std::abs(radius() - 1.0) <= RADIUS_TOL; }
+
   /// 8-cycle position:  k = tick mod 8, k ∈ Z/8Z.
   uint32_t cycle_pos = 0;
 
-  /// Advance one step in the 8-cycle:  β ← µ · β.
+  /// Advance one step in the 8-cycle:  β ← µ · β, cycle_pos += 1 mod 8.
   void tick() {
     beta *= MU;
     cycle_pos = (cycle_pos + 1) % 8;

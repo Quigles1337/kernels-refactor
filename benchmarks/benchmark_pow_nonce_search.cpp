@@ -36,49 +36,21 @@
 #include <cstdint>
 #include <openssl/sha.h>
 
-// ── Constants (mirrors quantum_kernel_v2.cpp) ────────────────────────────────
-constexpr double ETA             = 0.70710678118654752440;  // 1/√2
-constexpr double COHERENCE_TOLERANCE = 1e-9;
+#include <kernel/core/constants.hpp>
+#include <kernel/core/types.hpp>
+#include <kernel/core/theorems.hpp>
+#include <kernel/quantum/chiral_gate.hpp>
 
-// Mathematical constants
-constexpr double TWO_PI          = 2.0 * 3.14159265358979323846;
-
-// Palindrome precession denominator: 987654321/123456789 = 8 + 9/123456789
-//                                                        = 8 + 1/13717421
-// (since 9 × 13717421 = 123456789)
-constexpr double PALINDROME_DENOM = 13717421.0;
+using namespace kernel;
 
 // Precession increment for sweep k: delta_phase = 2π / (PALINDROME_DENOM × k)
 inline double precession_delta_phase(unsigned k) {
     return TWO_PI / (PALINDROME_DENOM * static_cast<double>(k));
 }
 
-using Cx = std::complex<double>;
-const Cx MU{ -ETA, ETA };  // µ = e^{i3π/4}
-
-// ── Minimal QState (self-contained; does not include quantum_kernel_v2.cpp) ──
-struct QState {
-    Cx alpha{ ETA, 0.0 };
-    Cx beta { -0.5, 0.5 };  // e^{i3π/4}/√2
-
-    double radius() const {
-        return std::abs(alpha) > COHERENCE_TOLERANCE
-             ? std::abs(beta) / std::abs(alpha) : 0.0;
-    }
-
-    void step() { beta *= MU; }
-};
-
-// ── Chiral non-linear gate (inline; avoids ODR conflict with kernel header) ──
-static const Cx CHIRAL_MU{ -ETA, ETA };
-
+// Chiral nonlinear gate wrapper using canonical kernel types.
 static inline QState chiral_nonlinear_local(QState state, double kick_strength) {
-    const bool positive_imag = (state.beta.imag() > 0.0);
-    state.beta *= CHIRAL_MU;
-    if (positive_imag && kick_strength != 0.0) {
-        state.beta += kick_strength * state.beta * std::abs(state.beta);
-    }
-    return state;
+    return kernel::quantum::chiral_nonlinear(state, kick_strength);
 }
 
 // ── SHA-256 helpers ───────────────────────────────────────────────────────────

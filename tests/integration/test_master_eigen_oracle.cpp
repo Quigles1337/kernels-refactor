@@ -37,6 +37,7 @@
 
 #include <kernel/oracle/master_eigen_oracle.hpp>
 
+using namespace kernel;
 using namespace kernel::oracle;
 
 // ── Test infrastructure
@@ -103,7 +104,7 @@ static void test_mu_orbit_structure() {
       max_ang = a;
   }
   test_assert(
-      max_ang - min_ang > MEO_PI,
+      max_ang - min_ang > PI,
       "\u03bc-orbit: angular spread > \u03c0 (covers more than half the "
       "circle)");
 }
@@ -117,7 +118,7 @@ static void test_oracle_contribution_signal() {
 
   // Perfect alignment: probe_angle == theta_target → contrib = G_eff · 1
   double g_eff = 1.0;
-  double theta = 0.3 * MEO_TWO_PI;
+  double theta = 0.3 * TWO_PI;
   double contrib_aligned =
       MasterEigenOracle::oracle_contrib(theta, theta, g_eff);
   test_assert(std::abs(contrib_aligned - 1.0) < 1e-12,
@@ -125,13 +126,13 @@ static void test_oracle_contribution_signal() {
 
   // Anti-aligned: probe_angle = theta + π → contrib = −G_eff
   double contrib_anti =
-      MasterEigenOracle::oracle_contrib(theta + MEO_PI, theta, g_eff);
+      MasterEigenOracle::oracle_contrib(theta + PI, theta, g_eff);
   test_assert(std::abs(contrib_anti + 1.0) < 1e-12,
               "oracle_contrib: anti-aligned probe → contrib = −G_eff");
 
   // Generic target: contrib strictly in (−1, +1)
-  double theta_generic = 0.123 * MEO_TWO_PI;
-  double probe_generic = 0.456 * MEO_TWO_PI;
+  double theta_generic = 0.123 * TWO_PI;
+  double probe_generic = 0.456 * TWO_PI;
   double contrib_generic =
       MasterEigenOracle::oracle_contrib(probe_generic, theta_generic, g_eff);
   test_assert(contrib_generic > -1.0 && contrib_generic < 1.0,
@@ -145,8 +146,8 @@ static void test_oracle_contribution_signal() {
               "oracle_contrib: G_eff scales contribution proportionally");
 
   // Near-target probe encodes angular proximity
-  double theta_near = theta_generic + 5.0 * MEO_PI / 180.0; // 5° away
-  double theta_far = theta_generic + 80.0 * MEO_PI / 180.0; // 80° away
+  double theta_near = theta_generic + 5.0 * PI / 180.0; // 5° away
+  double theta_far = theta_generic + 80.0 * PI / 180.0; // 80° away
   double c_near =
       MasterEigenOracle::oracle_contrib(theta_near, theta_generic, 1.0);
   double c_far =
@@ -207,7 +208,7 @@ static void test_accumulator_dynamics() {
 
   // After running a query, accumulators are non-trivial
   const uint64_t n = 1024;
-  const double theta_t = MEO_PI / 3.0; // 60°
+  const double theta_t = PI / 3.0; // 60°
   oracle.reset();
   QueryResult res = oracle.query(theta_t, n);
   double peak = res.accumulator_peak;
@@ -251,7 +252,7 @@ static void test_detection_scaling() {
     MasterEigenOracle oracle;
     // Use a fixed target near the midpoint of the search space
     const double theta_t =
-        MEO_TWO_PI * (static_cast<double>(n / 3)) / static_cast<double>(n);
+        TWO_PI * (static_cast<double>(n / 3)) / static_cast<double>(n);
     QueryResult r = oracle.query(theta_t, n);
     double sqrt_n = std::sqrt(static_cast<double>(n));
     double ratio = static_cast<double>(r.steps) / sqrt_n;
@@ -291,7 +292,7 @@ static void test_detection_scaling() {
   for (const auto &r : rows) {
     MasterEigenOracle oracle;
     const double theta_t =
-        MEO_TWO_PI * (static_cast<double>(r.n / 3)) / static_cast<double>(r.n);
+        TWO_PI * (static_cast<double>(r.n / 3)) / static_cast<double>(r.n);
     QueryResult qr = oracle.query(theta_t, r.n);
     if (qr.coherence <= 0.0 || qr.coherence > 1.0 + 1e-9)
       coherence_valid = false;
@@ -336,7 +337,7 @@ static void test_reset_behaviour() {
 
   MasterEigenOracle oracle;
   const uint64_t n = 512;
-  const double theta_t = MEO_PI / 4.0; // 45°
+  const double theta_t = PI / 4.0; // 45°
 
   // First query
   QueryResult r1 = oracle.query(theta_t, n);
@@ -385,7 +386,7 @@ static void test_phase_coverage() {
 
   for (int deg = 0; deg < 360; deg += 45) {
     MasterEigenOracle oracle;
-    double theta_t = deg * MEO_PI / 180.0;
+    double theta_t = deg * PI / 180.0;
     QueryResult r = oracle.query(theta_t, n);
     if (!r.detected)
       all_detected = false;
@@ -448,7 +449,7 @@ static void test_scaling_law_benchmark() {
     for (int trial = 0; trial < TRIALS; ++trial) {
       // Uniformly space targets across [0, 2π) for deterministic coverage
       const double theta_t =
-          MEO_TWO_PI * static_cast<double>(trial) / static_cast<double>(TRIALS);
+          TWO_PI * static_cast<double>(trial) / static_cast<double>(TRIALS);
       MasterEigenOracle oracle;
       QueryResult r = oracle.query(theta_t, N);
       if (r.detected) {
@@ -562,7 +563,7 @@ static void test_mechanism_isolation() {
 
   // Run ABL_TRIALS deterministic trials per N; fixed target θ_t = π/3
   static constexpr int ABL_TRIALS = 20;
-  static constexpr double ABL_THETA = MEO_PI / 3.0;
+  static constexpr double ABL_THETA = PI / 3.0;
   const uint64_t ns[] = {256, 1024, 4096, 16384};
 
   using Cx = kernel::oracle::Cx;
@@ -593,7 +594,7 @@ static void test_mechanism_isolation() {
       bool hit = false;
       for (uint64_t k = 0; !hit && k < max_steps; ++k) {
         // ABLATED: fresh random phasor instead of structured µ-orbit probe
-        double rand_angle = lcg(rng) * MEO_TWO_PI;
+        double rand_angle = lcg(rng) * TWO_PI;
         Cx probe{std::cos(rand_angle), std::sin(rand_angle)};
         acc += (probe * std::conj(target_ph)).real(); // g_eff = 1
         if (std::abs(acc) >= threshold)
@@ -665,7 +666,7 @@ static void test_mechanism_isolation() {
       bool hit = false;
       for (uint64_t k = 0; !hit && k < max_steps; ++k) {
         // ABLATED: random phase step ∈ [0, 2π) instead of constant 2π/√N
-        current_angle += lcg(rng) * MEO_TWO_PI;
+        current_angle += lcg(rng) * TWO_PI;
         Cx probe{std::cos(current_angle), std::sin(current_angle)};
         // µ-orbit intact (j=0), g_eff = 1; only phase step is ablated
         acc += (probe * std::conj(target_ph)).real();
@@ -702,10 +703,10 @@ static void test_mechanism_isolation() {
 // 11. Conjecture Constants (8 + 1/Δ palindrome quotient)
 //
 // Validates the conjecture constants introduced in MasterEigenOracle.hpp:
-//   MEO_DELTA       = 13 717 421  (palindrome denominator factor)
-//   MEO_EPSILON     = 1/Δ ≈ 7.29×10⁻⁸  (fine-tuning perturbation)
-//   MEO_ORACLE_RATE = 8 + ε  (palindrome quotient)
-//   MEO_SUPER_PERIOD= 8 × Δ = 109 739 368  (time super-period)
+//   PALINDROME_DENOM    = 13 717 421  (palindrome denominator factor)
+//   PALINDROME_EPSILON     = 1/Δ ≈ 7.29×10⁻⁸  (fine-tuning perturbation)
+//   ORACLE_RATE = 8 + ε  (palindrome quotient)
+//   SUPER_PERIOD= 8 × Δ = 109 739 368  (time super-period)
 //
 // These constants encode the hierarchical Oracle–Bitcoin–Time triad.
 // ══════════════════════════════════════════════════════════════════════════════
@@ -714,50 +715,50 @@ static void test_conjecture_constants() {
                "────────────────────────────────\n";
 
   // Δ = PALINDROME_DENOM_FACTOR = 13 717 421
-  test_assert(MEO_DELTA == kernel::quantum::PALINDROME_DENOM_FACTOR,
-              "conjecture: MEO_DELTA == PALINDROME_DENOM_FACTOR (13717421)");
-  test_assert(MEO_DELTA == 13717421ULL, "conjecture: MEO_DELTA == 13 717 421");
+  test_assert(static_cast<uint64_t>(PALINDROME_DENOM) == kernel::quantum::PALINDROME_DENOM_FACTOR,
+              "conjecture: PALINDROME_DENOM == PALINDROME_DENOM_FACTOR (13717421)");
+  test_assert(static_cast<uint64_t>(PALINDROME_DENOM) == 13717421ULL, "conjecture: PALINDROME_DENOM == 13 717 421");
 
   // ε = 1/Δ ≈ 7.29×10⁻⁸
   const double expected_eps = 1.0 / 13717421.0;
   test_assert(
-      std::abs(MEO_EPSILON - expected_eps) < 1e-20,
-      "conjecture: MEO_EPSILON = 1/\u0394 \u2248 7.29\u00d710\u207b\u2078");
+      std::abs(PALINDROME_EPSILON - expected_eps) < 1e-20,
+      "conjecture: PALINDROME_EPSILON = 1/\u0394 \u2248 7.29\u00d710\u207b\u2078");
   test_assert(
-      MEO_EPSILON > 0.0 && MEO_EPSILON < 1e-6,
-      "conjecture: MEO_EPSILON \u2208 (0, 10\u207b\u2076) — fine perturbation");
+      PALINDROME_EPSILON > 0.0 && PALINDROME_EPSILON < 1e-6,
+      "conjecture: PALINDROME_EPSILON \u2208 (0, 10\u207b\u2076) — fine perturbation");
 
   // Oracle rate: 8 + ε = palindrome quotient 987654321/123456789
   const double palindrome_quotient =
       static_cast<double>(987654321ULL) / static_cast<double>(123456789ULL);
-  test_assert(std::abs(MEO_ORACLE_RATE - palindrome_quotient) < 1e-12,
-              "conjecture: MEO_ORACLE_RATE = 8 + \u03b5 = palindrome quotient "
+  test_assert(std::abs(ORACLE_RATE - palindrome_quotient) < 1e-12,
+              "conjecture: ORACLE_RATE = 8 + \u03b5 = palindrome quotient "
               "987654321/123456789");
 
-  // MEO_ORACLE_RATE is just above 8 (breaks exact 8-periodicity)
-  test_assert(MEO_ORACLE_RATE > 8.0 && MEO_ORACLE_RATE < 8.0 + 1e-6,
-              "conjecture: MEO_ORACLE_RATE \u2208 (8, 8+10\u207b\u2076) — "
+  // ORACLE_RATE is just above 8 (breaks exact 8-periodicity)
+  test_assert(ORACLE_RATE > 8.0 && ORACLE_RATE < 8.0 + 1e-6,
+              "conjecture: ORACLE_RATE \u2208 (8, 8+10\u207b\u2076) — "
               "slight super-integer perturbation");
 
   // Super-period: 8 × Δ = 109 739 368
-  test_assert(MEO_SUPER_PERIOD == 8ULL * MEO_DELTA,
-              "conjecture: MEO_SUPER_PERIOD = 8 \u00d7 \u0394 (torus T\u00b2 "
+  test_assert(SUPER_PERIOD == 8ULL * static_cast<uint64_t>(PALINDROME_DENOM),
+              "conjecture: SUPER_PERIOD = 8 \u00d7 \u0394 (torus T\u00b2 "
               "complete realignment)");
-  test_assert(MEO_SUPER_PERIOD == 109739368ULL,
-              "conjecture: MEO_SUPER_PERIOD = 109 739 368 (\u224809M-step "
+  test_assert(SUPER_PERIOD == 109739368ULL,
+              "conjecture: SUPER_PERIOD = 109 739 368 (\u224809M-step "
               "super-period)");
 
   // symmetry_breaking_factor() returns ε
   test_assert(std::abs(MasterEigenOracle::symmetry_breaking_factor() -
-                       MEO_EPSILON) < 1e-20,
-              "conjecture: symmetry_breaking_factor() == MEO_EPSILON");
+                       PALINDROME_EPSILON) < 1e-20,
+              "conjecture: symmetry_breaking_factor() == PALINDROME_EPSILON");
 
-  // N_CHANNELS (8) × ε = MEO_SUPER_PERIOD / Δ — confirms triad relationship
-  // Actually: 8 × Δ = MEO_SUPER_PERIOD, and ε = 1/Δ
-  // So MEO_N_CHANNELS * MEO_DELTA == MEO_SUPER_PERIOD
+  // N_CHANNELS (8) × ε = SUPER_PERIOD / Δ — confirms triad relationship
+  // Actually: 8 × Δ = SUPER_PERIOD, and ε = 1/Δ
+  // So MEO_N_CHANNELS * PALINDROME_DENOM == SUPER_PERIOD
   test_assert(
-      static_cast<uint64_t>(MEO_N_CHANNELS) * MEO_DELTA == MEO_SUPER_PERIOD,
-      "conjecture: 8 \u00d7 \u0394 == MEO_SUPER_PERIOD (hierarchical triad: "
+      static_cast<uint64_t>(MEO_N_CHANNELS) * static_cast<uint64_t>(PALINDROME_DENOM) == SUPER_PERIOD,
+      "conjecture: 8 \u00d7 \u0394 == SUPER_PERIOD (hierarchical triad: "
       "fast\u00d7slow = super-period)");
 }
 
@@ -779,8 +780,8 @@ static void test_palindrome_precession_integration() {
   // Phase step ΔΦ = 2π / Δ
   const double delta_phi = PRECESSION_DELTA_PHASE;
   test_assert(
-      std::abs(delta_phi - MEO_TWO_PI / static_cast<double>(MEO_DELTA)) < 1e-15,
-      "precession: \u0394\u03a6 = 2\u03c0/\u0394 consistent with MEO_DELTA");
+      std::abs(delta_phi - TWO_PI / PALINDROME_DENOM) < 1e-15,
+      "precession: \u0394\u03a6 = 2\u03c0/\u0394 consistent with PALINDROME_DENOM");
 
   // After 8 precession steps, phase = 8 × ΔΦ = 8ε × 2π (small, not 2π)
   const double phase_after_8 = 8.0 * delta_phi;
@@ -793,14 +794,14 @@ static void test_palindrome_precession_integration() {
   const double phase_after_delta =
       static_cast<double>(PALINDROME_DENOM_FACTOR) * delta_phi;
   test_assert(
-      std::abs(phase_after_delta - MEO_TWO_PI) < 1e-9,
+      std::abs(phase_after_delta - TWO_PI) < 1e-9,
       "precession: \u0394 \u00d7 \u0394\u03a6 \u2248 2\u03c0 (slow-cycle "
       "full return after \u0394 = 13717421 steps)");
 
   // ε = ΔΦ / (2π): fractional phase per step equals ε
-  const double eps_from_phi = delta_phi / MEO_TWO_PI;
-  test_assert(std::abs(eps_from_phi - MEO_EPSILON) < 1e-15,
-              "precession: \u0394\u03a6 / 2\u03c0 = \u03b5 = MEO_EPSILON "
+  const double eps_from_phi = delta_phi / TWO_PI;
+  test_assert(std::abs(eps_from_phi - PALINDROME_EPSILON) < 1e-15,
+              "precession: \u0394\u03a6 / 2\u03c0 = \u03b5 = PALINDROME_EPSILON "
               "(phase per step encodes the fine-tuning perturbation)");
 
   // PalindromePrecession STEP_PHASOR has unit norm — invariant preserved
@@ -826,7 +827,7 @@ static void test_coherence_harvest() {
   std::cout << "\n── 13. Coherence Harvest "
                "──────────────────────────────────────────────\n";
 
-  const double theta_t = MEO_PI / 3.0; // 60°
+  const double theta_t = PI / 3.0; // 60°
   const uint64_t window = 64;
 
   MasterEigenOracle oracle;
@@ -846,7 +847,7 @@ static void test_coherence_harvest() {
       "harvest: harvest_channel \u2208 {0\u20267} (valid eigenspace index)");
 
   // epsilon_drift = window × ε
-  const double expected_drift = static_cast<double>(window) * MEO_EPSILON;
+  const double expected_drift = static_cast<double>(window) * PALINDROME_EPSILON;
   test_assert(std::abs(h.epsilon_drift - expected_drift) < 1e-20,
               "harvest: epsilon_drift = window \u00d7 \u03b5 (cumulative "
               "symmetry-breaking drift)");

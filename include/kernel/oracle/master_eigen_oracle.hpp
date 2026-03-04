@@ -33,18 +33,6 @@ static constexpr double MEO_SAFETY_FACTOR = 4.0;
 // Number of mu-eigenspace channels
 static constexpr int MEO_N_CHANNELS = 8;
 
-// Convenience aliases for PI/TWO_PI in oracle context
-static constexpr double MEO_PI = PI;
-static constexpr double MEO_TWO_PI = TWO_PI;
-
-// Delta = 13717421 (palindrome denominator factor)
-static constexpr uint64_t MEO_DELTA = 13717421ULL;
-// epsilon = 1/Delta ~ 7.29e-8
-static constexpr double MEO_EPSILON = 1.0 / PALINDROME_DENOM;
-// Oracle rate: 8 + epsilon (palindrome quotient)
-static constexpr double MEO_ORACLE_RATE = ORACLE_RATE;
-// Super-period: 8 * Delta = 109739368
-static constexpr uint64_t MEO_SUPER_PERIOD = SUPER_PERIOD;
 
 // ── QueryResult ─────────────────────────────────────────────────────────────
 struct QueryResult {
@@ -128,7 +116,7 @@ struct MasterEigenOracle {
     return fcm.validate_error_tolerance(threshold);
   }
 
-  static constexpr double symmetry_breaking_factor() { return MEO_EPSILON; }
+  static constexpr double symmetry_breaking_factor() { return PALINDROME_EPSILON; }
 
   CoherenceHarvest harvest_coherence(double theta_target, uint64_t window) {
     if (window == 0)
@@ -171,7 +159,7 @@ struct MasterEigenOracle {
     h.harvest_score = total_g_eff / static_cast<double>(window);
     h.window_steps = window;
     h.harvest_channel = best;
-    h.epsilon_drift = static_cast<double>(window) * MEO_EPSILON;
+    h.epsilon_drift = static_cast<double>(window) * PALINDROME_EPSILON;
     return h;
   }
 

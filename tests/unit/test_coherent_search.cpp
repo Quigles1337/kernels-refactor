@@ -87,22 +87,17 @@ using kernel::quantum::PalindromePrecession;
 // best channel always has overlap ≥ cos(22.5°) ≈ 0.924.
 //
 struct NullSliceBridge {
-  static const Cx MU; // µ = e^{i3π/4}  (balance primitive, Section 2)
-
   // Returns the 8 unit-circle phasors from the µ = e^{i3π/4} 8-cycle.
   static std::array<Cx, 8> build_8cycle_bridge() {
     std::array<Cx, 8> bridge;
     Cx power{1.0, 0.0};
     for (int k = 0; k < 8; ++k) {
       bridge[k] = power;
-      power *= MU;
+      power *= kernel::MU;
     }
     return bridge;
   }
 };
-
-// µ = e^{i3π/4}: cos(3π/4) = -1/√2, sin(3π/4) = 1/√2
-const Cx NullSliceBridge::MU{-kernel::ETA, kernel::ETA};
 
 // ── Reproducibility: fixed RNG seed (requirement 6)
 // ─────────────────────────────
@@ -880,8 +875,6 @@ static bool test_phase_evolution() {
 
   const uint64_t scale = static_cast<uint64_t>(
       PALINDROME_DENOM_FACTOR / std::sqrt(static_cast<double>(N_CHECK)));
-  const Cx MU{-ETA, ETA}; // µ = e^{i3π/4}
-
   // Verify µ has unit norm once (it's a compile-time constant).
   const double mu_err = std::abs(std::abs(MU) - 1.0);
 

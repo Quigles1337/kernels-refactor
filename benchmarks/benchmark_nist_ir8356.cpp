@@ -22,42 +22,19 @@
 #include <string>
 #include <vector>
 
-// ── Theorem Constants (from quantum_kernel_v2.cpp) ──────────────────────────
-constexpr double ETA = 0.70710678118654752440;        // 1/√2
-constexpr double DELTA_S = 2.41421356237309504880;    // δ_S = 1+√2
-constexpr double DELTA_CONJ = 0.41421356237309504880; // √2-1 = 1/δ_S
+#include <kernel/core/constants.hpp>
+#include <kernel/core/types.hpp>
+#include <kernel/core/theorems.hpp>
 
-constexpr double COHERENCE_TOLERANCE = 1e-9;
-constexpr double RADIUS_TOLERANCE = 1e-9;
-constexpr double CONSERVATION_TOL = 1e-12;
+using namespace kernel;
 
-using Cx = std::complex<double>;
-const Cx MU{-ETA, ETA}; // µ = e^{i3π/4}
-
-// ── Theorem 11: Coherence Function ──────────────────────────────────────────
-double coherence(double r) { return (2.0 * r) / (1.0 + r * r); }
-
-// ── Quantum State Structure ──────────────────────────────────────────────────
-struct QState {
-  Cx alpha{ETA, 0.0}; // α = 1/√2
-  Cx beta{-0.5, 0.5}; // β = e^{i3π/4}/√2
-
-  double radius() const {
-    return std::abs(alpha) > COHERENCE_TOLERANCE
-               ? std::abs(beta) / std::abs(alpha)
-               : 0.0;
-  }
-
-  double coherence_value() const { return coherence(radius()); }
-
-  void step() { beta *= MU; } // Apply 8-cycle rotation
-
-  bool is_normalized() const {
-    double norm =
-        std::abs(alpha) * std::abs(alpha) + std::abs(beta) * std::abs(beta);
-    return std::abs(norm - 1.0) < COHERENCE_TOLERANCE;
-  }
-};
+// ── QState convenience wrappers for benchmarking ─────────────────────────────
+inline double coherence_value(const QState& q) { return coherence(q.radius()); }
+inline bool is_normalized(const QState& q) {
+  double norm = std::abs(q.alpha) * std::abs(q.alpha)
+              + std::abs(q.beta)  * std::abs(q.beta);
+  return std::abs(norm - 1.0) < COHERENCE_TOL;
+}
 
 // ── Statistical Utilities ────────────────────────────────────────────────────
 struct BenchmarkStats {
@@ -168,8 +145,8 @@ ProcessSpawnResults benchmark_process_spawning() {
     size_t success_count = 0;
     for (size_t i = 0; i < n; ++i) {
       QState proc;
-      if (proc.is_normalized() &&
-          std::abs(proc.radius() - 1.0) < RADIUS_TOLERANCE) {
+      if (is_normalized(proc) &&
+          std::abs(proc.radius() - 1.0) < RADIUS_TOL) {
         success_count++;
       }
       processes.push_back(proc);
@@ -182,7 +159,7 @@ ProcessSpawnResults benchmark_process_spawning() {
     // Calculate coherence across all processes
     double avg_coherence = 0.0;
     for (const auto &proc : processes) {
-      avg_coherence += proc.coherence_value();
+      avg_coherence += coherence_value(proc);
     }
     avg_coherence /= processes.size();
 
@@ -254,8 +231,8 @@ SchedulingResults benchmark_scheduling_throughput() {
     double avg_coherence = 0.0;
     size_t coherent_count = 0;
     for (const auto &proc : processes) {
-      avg_coherence += proc.coherence_value();
-      if (std::abs(proc.radius() - 1.0) < RADIUS_TOLERANCE) {
+      avg_coherence += coherence_value(proc);
+      if (std::abs(proc.radius() - 1.0) < RADIUS_TOL) {
         coherent_count++;
       }
     }
@@ -397,7 +374,7 @@ CoherenceScaleResults benchmark_coherence_at_scale() {
       double cycle_coherence = 0.0;
       for (auto &proc : processes) {
         proc.step();
-        cycle_coherence += proc.coherence_value();
+        cycle_coherence += coherence_value(proc);
       }
       coherence_samples.push_back(cycle_coherence / n);
     }
