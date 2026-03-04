@@ -4,7 +4,7 @@
 
 A header-only C++17 library implementing the **Pipeline of Coherence**, a mathematical framework for quantum process management based on the balanced eigenvalue µ = e^{i3π/4} = (−1+i)/√2 and its 8-fold cyclic closure µ⁸ = 1.
 
-Mathematical framework by **Alexander Zalewski** ([COINjecture Network](https://github.com/COINjecture1337) / DARQ Labs).
+Mathematical framework by **Alexander David Zalewski** ([COINjecture Network](https://github.com/COINjecture1337) / DARQ Labs).
 Original implementation by **beanapologist**.
 
 ---
